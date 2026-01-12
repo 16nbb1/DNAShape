@@ -1,0 +1,8 @@
+Type: INDEL
+00:00:00 SnpEff version SnpEff 5.4a (build 2025-11-25 12:22), by Pablo Cingolani
+00:00:00 Command: 'ann'
+00:00:00 Reading configuration file 'snpEff.config'. Genome: 'GRCh38.99'
+00:00:00 Looking for config file: '/project/6069023/nboev/scripts/work/30/978c11329137b1c61e8b552712144e/snpEff.config'
+00:00:00 Reading config file: /project/6069023/nboev/tools/snpEff/snpEff/snpEff.config
+00:00:00 done
+00:00:00 Reading database for genome version 'GRCh38.99' from file '/project/6069023/nboev/tools/snpEff/snpEff/./data/GRCh38.99/snpEffectPredictor.bin' (this might take a while)

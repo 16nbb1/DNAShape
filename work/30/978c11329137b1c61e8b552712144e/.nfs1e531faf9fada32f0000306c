@@ -1,0 +1,163 @@
+#!/bin/bash
+### ---
+### name: 'ANNOT_VCF (2)'
+### outputs:
+### - 'CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.annotMotifPhast.vcf'
+### ...
+set -e
+set -u
+NXF_DEBUG=${NXF_DEBUG:=0}; [[ $NXF_DEBUG > 1 ]] && set -x
+NXF_ENTRY=${1:-nxf_main}
+
+nxf_module_load(){
+  local mod=$1
+  local ver=${2:-}
+  local new_module="$mod"; [[ $ver ]] && new_module+="/$ver"
+
+  if [[ ! $(module list 2>&1 | grep -o "$new_module") ]]; then
+    old_module=$(module list 2>&1 | grep -Eow "$mod\/[^\( \n]+" || true)
+    if [[ $ver && $old_module ]]; then
+      module switch $old_module $new_module
+    else
+      module load $new_module
+    fi
+  fi
+}
+
+nxf_sleep() {
+  sleep $1 2>/dev/null || sleep 1;
+}
+
+nxf_date() {
+    local ts=$(date +%s%3N);
+    if [[ ${#ts} == 10 ]]; then echo ${ts}000
+    elif [[ $ts == *%3N ]]; then echo ${ts/\%3N/000}
+    elif [[ $ts == *3N ]]; then echo ${ts/3N/000}
+    elif [[ ${#ts} == 13 ]]; then echo $ts
+    else echo "Unexpected timestamp value: $ts"; exit 1
+    fi
+}
+
+nxf_env() {
+    echo '============= task environment ============='
+    env | sort | sed "s/\(.*\)AWS\(.*\)=\(.\{6\}\).*/\1AWS\2=\3xxxxxxxxxxxxx/"
+    echo '============= task output =================='
+}
+
+nxf_kill() {
+    declare -a children
+    while read P PP;do
+        children[$PP]+=" $P"
+    done < <(ps -e -o pid= -o ppid=)
+
+    kill_all() {
+        [[ $1 != $$ ]] && kill $1 2>/dev/null || true
+        for i in ${children[$1]:=}; do kill_all $i; done
+    }
+
+    kill_all $1
+}
+
+nxf_mktemp() {
+    local base=${1:-/tmp}
+    mkdir -p "$base"
+    if [[ $(uname) = Darwin ]]; then mktemp -d $base/nxf.XXXXXXXXXX
+    else TMPDIR="$base" mktemp -d -t nxf.XXXXXXXXXX
+    fi
+}
+
+nxf_fs_copy() {
+  local source=$1
+  local target=$2
+  local basedir=$(dirname $1)
+  mkdir -p $target/$basedir
+  cp -fRL $source $target/$basedir
+}
+
+nxf_fs_move() {
+  local source=$1
+  local target=$2
+  local basedir=$(dirname $1)
+  mkdir -p $target/$basedir
+  mv -f $source $target/$basedir
+}
+
+nxf_fs_rsync() {
+  rsync -rRl $1 $2
+}
+
+nxf_fs_rclone() {
+  rclone copyto $1 $2/$1
+}
+
+nxf_fs_fcp() {
+  fcp $1 $2/$1
+}
+
+on_exit() {
+    local last_err=$?
+    local exit_status=${nxf_main_ret:=0}
+    [[ ${exit_status} -eq 0 && ${nxf_unstage_ret:=0} -ne 0 ]] && exit_status=${nxf_unstage_ret:=0}
+    [[ ${exit_status} -eq 0 && ${last_err} -ne 0 ]] && exit_status=${last_err}
+    printf -- $exit_status > /project/6069023/nboev/scripts/work/30/978c11329137b1c61e8b552712144e/.exitcode
+    set +u
+    exit $exit_status
+}
+
+on_term() {
+    set +e
+    [[ "$pid" ]] && nxf_kill $pid
+}
+
+nxf_launch() {
+    /bin/bash -ue /project/6069023/nboev/scripts/work/30/978c11329137b1c61e8b552712144e/.command.sh
+}
+
+nxf_stage() {
+    true
+    # stage input files
+    rm -f CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.vcf
+    ln -s /project/6069023/nboev/scripts/work/03/a1a85085bc2cb3d08a94633a58142e/INDEL/CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.vcf CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.vcf
+}
+
+nxf_unstage_outputs() {
+    true
+}
+
+nxf_unstage_controls() {
+    true
+}
+
+nxf_unstage() {
+    if [[ ${nxf_main_ret:=0} == 0 ]]; then
+        (set -e -o pipefail; (nxf_unstage_outputs | tee -a .command.out) 3>&1 1>&2 2>&3 | tee -a .command.err)
+        nxf_unstage_ret=$?
+    fi
+    nxf_unstage_controls
+}
+
+nxf_main() {
+    trap on_exit EXIT
+    trap on_term TERM INT USR2
+    trap '' USR1
+
+    [[ "${NXF_CHDIR:-}" ]] && cd "$NXF_CHDIR"
+    NXF_SCRATCH=''
+    [[ $NXF_DEBUG > 0 ]] && nxf_env
+    touch /project/6069023/nboev/scripts/work/30/978c11329137b1c61e8b552712144e/.command.begin
+    set +u
+    nxf_module_load StdEnv 2023
+    nxf_module_load java 21.0.1
+    set -u
+    [[ $NXF_SCRATCH ]] && cd $NXF_SCRATCH
+    export NXF_TASK_WORKDIR="$PWD"
+    nxf_stage
+
+    set +e
+    (set -o pipefail; (nxf_launch | tee .command.out) 3>&1 1>&2 2>&3 | tee .command.err) &
+    pid=$!
+    wait $pid || nxf_main_ret=$?
+    nxf_unstage
+}
+
+$NXF_ENTRY

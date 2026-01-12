@@ -1,0 +1,150 @@
+Jan-12 17:18:27.154 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf --input /home/nboev/projects/def-sushant/nboev/preprocess/CPTAC-3/BrainCancer/wgs_alt/aa44f64c-570f-464d-9750-0e1eeede6f45/CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.vcf --output_dir ./BrainCancer/wgs_alt/aa44f64c-570f-464d-9750-0e1eeede6f45
+Jan-12 17:18:27.412 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 25.10.2
+Jan-12 17:18:27.428 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/nboev/.nextflow/plugins; core-plugins: nf-amazon@3.4.2,nf-azure@1.20.2,nf-cloudcache@0.5.0,nf-codecommit@0.5.0,nf-console@1.3.0,nf-google@1.23.3,nf-k8s@1.2.2,nf-tower@1.17.3,nf-wave@1.16.1
+Jan-12 17:18:27.452 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Jan-12 17:18:27.453 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Jan-12 17:18:27.455 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.12.0 in 'deployment' mode
+Jan-12 17:18:27.471 [main] DEBUG nextflow.util.RetryConfig - Missing nextflow session - using default retry config
+Jan-12 17:18:27.575 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Jan-12 17:18:27.637 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Jan-12 17:18:27.637 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Jan-12 17:18:27.647 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/nboev/.nextflow/secrets/store.json
+Jan-12 17:18:27.657 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@5cdf39b2] - activable => nextflow.secret.LocalSecretsProvider@5cdf39b2
+Jan-12 17:18:27.659 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declaration
+Jan-12 17:18:27.763 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [drunk_dubinsky] DSL2 - revision: c82dd7915a
+Jan-12 17:18:27.804 [main] DEBUG nextflow.Session - Session UUID: 85d499ad-4a7e-4530-9879-3cec10054984
+Jan-12 17:18:27.805 [main] DEBUG nextflow.Session - Run name: drunk_dubinsky
+Jan-12 17:18:27.805 [main] DEBUG nextflow.Session - Executor pool size: 2
+Jan-12 17:18:27.811 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Jan-12 17:18:27.816 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=10; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jan-12 17:18:27.835 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 25.10.2 build 10555
+  Created: 28-11-2025 19:24 UTC (14:24 EDT)
+  System: Linux 5.14.0-570.44.1.el9_6.x86_64
+  Runtime: Groovy 4.0.28 on OpenJDK 64-Bit Server VM 21.0.1+12-29
+  Encoding: UTF-8 (UTF-8)
+  Process: 328846@l1.nibi.sharcnet [10.39.0.11]
+  CPUs: 1 - Mem: 251.7 GB (5.8 GB) - Swap: 32 GB (29.2 GB)
+Jan-12 17:18:27.897 [main] DEBUG nextflow.Session - Work-dir: /project/6069023/nboev/scripts/work [nfs]
+Jan-12 17:18:27.898 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /project/6069023/nboev/scripts/bin
+Jan-12 17:18:27.904 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Jan-12 17:18:27.910 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Jan-12 17:18:27.913 [main] DEBUG nextflow.Session - Observer factory (v2): DefaultObserverFactory
+Jan-12 17:18:27.953 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Jan-12 17:18:27.960 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 2; maxThreads: 1000
+Jan-12 17:18:28.110 [main] DEBUG nextflow.Session - Session start
+Jan-12 17:18:28.713 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Jan-12 17:18:28.837 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-12 17:18:28.838 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-12 17:18:28.845 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Jan-12 17:18:28.851 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=1; memory=251.7 GB; capacity=1; pollInterval=100ms; dumpInterval=5m
+Jan-12 17:18:28.853 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Jan-12 17:18:28.878 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'FILTER_SNV': maxForks=0; fair=false; array=0
+Jan-12 17:18:28.934 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-12 17:18:28.934 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-12 17:18:28.935 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'ANNOT_VCF': maxForks=0; fair=false; array=0
+Jan-12 17:18:28.946 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-12 17:18:28.947 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-12 17:18:28.947 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'SIGPROFILER': maxForks=0; fair=false; array=0
+Jan-12 17:18:28.958 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: null
+Jan-12 17:18:28.958 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Jan-12 17:18:28.959 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'SNV_CONTEXT': maxForks=0; fair=false; array=0
+Jan-12 17:18:28.961 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: SIGPROFILER, ANNOT_VCF, SNV_CONTEXT, FILTER_SNV
+Jan-12 17:18:28.963 [main] DEBUG nextflow.Session - Igniting dataflow network (5)
+Jan-12 17:18:28.969 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FILTER_SNV
+Jan-12 17:18:28.970 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > ANNOT_VCF
+Jan-12 17:18:28.970 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > SIGPROFILER
+Jan-12 17:18:28.970 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > SNV_CONTEXT
+Jan-12 17:18:28.971 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  Script_face3e5e57ad75d2: /project/6069023/nboev/scripts/main.nf
+Jan-12 17:18:28.971 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Jan-12 17:18:28.971 [main] DEBUG nextflow.Session - Session await
+Jan-12 17:18:29.272 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:18:29.274 [Task submitter] INFO  nextflow.Session - [d7/4b3594] Submitted process > FILTER_SNV (1)
+Jan-12 17:18:30.100 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: FILTER_SNV (1); status: COMPLETED; exit: 0; error: -; workDir: /project/6069023/nboev/scripts/work/d7/4b35944831f18bbc73f58b90a69804]
+Jan-12 17:18:30.101 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=10; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jan-12 17:18:30.148 [TaskFinalizer-1] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=10; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Jan-12 17:18:30.266 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:18:30.266 [Task submitter] INFO  nextflow.Session - [fb/c9cb29] Submitted process > ANNOT_VCF (2)
+Jan-12 17:19:41.271 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: ANNOT_VCF (2); status: COMPLETED; exit: 0; error: -; workDir: /project/6069023/nboev/scripts/work/fb/c9cb29d297645842f00b2c3c6337eb]
+Jan-12 17:19:41.288 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:19:41.289 [Task submitter] INFO  nextflow.Session - [5c/bed3a7] Submitted process > ANNOT_VCF (1)
+Jan-12 17:20:22.489 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: ANNOT_VCF (1); status: COMPLETED; exit: 0; error: -; workDir: /project/6069023/nboev/scripts/work/5c/bed3a7cfefa0e75ee937e2126f3936]
+Jan-12 17:20:22.544 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:20:22.544 [Task submitter] INFO  nextflow.Session - [cf/9b2bfe] Submitted process > SIGPROFILER (INDEL)
+Jan-12 17:21:03.417 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: SIGPROFILER (INDEL); status: COMPLETED; exit: 0; error: -; workDir: /project/6069023/nboev/scripts/work/cf/9b2bfea571d191688217f00644e486]
+Jan-12 17:21:03.577 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:21:03.578 [Task submitter] INFO  nextflow.Session - [da/f4d104] Submitted process > SIGPROFILER (SNV)
+Jan-12 17:21:40.543 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: SIGPROFILER (SNV); status: COMPLETED; exit: 0; error: -; workDir: /project/6069023/nboev/scripts/work/da/f4d104e26ee52c5b107c1d2d910e3c]
+Jan-12 17:21:40.602 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Jan-12 17:21:40.602 [Task submitter] INFO  nextflow.Session - [1c/08e4bc] Submitted process > SNV_CONTEXT (1)
+Jan-12 17:23:28.991 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 6; name: SNV_CONTEXT (1); status: RUNNING; exit: -; error: -; workDir: /project/6069023/nboev/scripts/work/1c/08e4bc8bb7910b7543944e63dfcca0]
+Jan-12 17:24:04.036 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 6; name: SNV_CONTEXT (1); status: COMPLETED; exit: 137; error: -; workDir: /project/6069023/nboev/scripts/work/1c/08e4bc8bb7910b7543944e63dfcca0]
+Jan-12 17:24:04.045 [TaskFinalizer-6] DEBUG nextflow.processor.TaskProcessor - Handling unexpected condition for
+  task: name=SNV_CONTEXT (1); work-dir=/project/6069023/nboev/scripts/work/1c/08e4bc8bb7910b7543944e63dfcca0
+  error [nextflow.exception.ProcessFailedException]: Process `SNV_CONTEXT (1)` terminated with an error exit status (137)
+Jan-12 17:24:04.068 [TaskFinalizer-6] ERROR nextflow.processor.TaskProcessor - Error executing process > 'SNV_CONTEXT (1)'
+
+Caused by:
+  Process `SNV_CONTEXT (1)` terminated with an error exit status (137)
+
+
+Command executed:
+
+  module load StdEnv/2023 python scipy-stack
+  source ~/ENV/bin/activate
+  python /project/6069023/nboev/scripts/process/mutcontextSNV.py CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.SNV.recode.annotMotifPhast.vcf Decomposed_Mutation_Probabilities_CPTAC-3.txt /home/nboev/projects/def-sushant/nboev/data/refgenome/Jellyfish/11mer_hg38/DNAShape/DNAShape_11.hg38.kmer.tsv >> mutcontextSNV.py.txt
+
+Command exit status:
+  137
+
+Command output:
+  (empty)
+
+Command error:
+  .command.sh: line 4: 346362 Killed                  python /project/6069023/nboev/scripts/process/mutcontextSNV.py CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.SNV.recode.annotMotifPhast.vcf Decomposed_Mutation_Probabilities_CPTAC-3.txt /home/nboev/projects/def-sushant/nboev/data/refgenome/Jellyfish/11mer_hg38/DNAShape/DNAShape_11.hg38.kmer.tsv >> mutcontextSNV.py.txt
+
+Work dir:
+  /project/6069023/nboev/scripts/work/1c/08e4bc8bb7910b7543944e63dfcca0
+
+Tip: view the complete command output by changing to the process work dir and entering the command `cat .command.out`
+Jan-12 17:24:04.072 [main] DEBUG nextflow.Session - Session await > all processes finished
+Jan-12 17:24:04.072 [TaskFinalizer-6] DEBUG nextflow.Session - Session aborted -- Cause: Process `SNV_CONTEXT (1)` terminated with an error exit status (137)
+Jan-12 17:24:04.089 [TaskFinalizer-6] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=5; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=3m 10s; failedDuration=2m 23s; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Jan-12 17:24:04.106 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Jan-12 17:24:04.106 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Jan-12 17:24:04.108 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=5; failedCount=1; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=3m 10s; failedDuration=2m 23s; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Jan-12 17:24:04.108 [TaskFinalizer-6] DEBUG nextflow.Session - null
+java.lang.InterruptedException: null
+	at java.base/java.lang.Object.wait0(Native Method)
+	at java.base/java.lang.Object.wait(Object.java:366)
+	at java.base/java.lang.Thread.join(Thread.java:2078)
+	at java.base/java.lang.Thread.join(Thread.java:2154)
+	at nextflow.trace.AnsiLogObserver.onFlowComplete(AnsiLogObserver.groovy:520)
+	at nextflow.Session$_notifyFlowComplete_lambda39.doCall(Session.groovy:1121)
+	at nextflow.Session.notifyEvent(Session.groovy:1151)
+	at nextflow.Session.notifyFlowComplete(Session.groovy:1121)
+	at nextflow.Session.shutdown0(Session.groovy:779)
+	at nextflow.Session.abort(Session.groovy:834)
+	at nextflow.Session.fault(Session.groovy:796)
+	at nextflow.processor.TaskPollingMonitor.finalizeTask(TaskPollingMonitor.groovy:753)
+	at nextflow.processor.TaskPollingMonitor.safeFinalizeTask(TaskPollingMonitor.groovy:736)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.codehaus.groovy.reflection.CachedMethod.invoke(CachedMethod.java:343)
+	at groovy.lang.MetaMethod.doMethodInvoke(MetaMethod.java:328)
+	at groovy.lang.MetaClassImpl.doInvokeMethod(MetaClassImpl.java:1339)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1094)
+	at groovy.lang.MetaClassImpl.invokeMethod(MetaClassImpl.java:1007)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokePogoMethod(InvokerHelper.java:645)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokeMethod(InvokerHelper.java:628)
+	at org.codehaus.groovy.runtime.InvokerHelper.invokeMethodSafe(InvokerHelper.java:82)
+	at nextflow.processor.TaskPollingMonitor$_checkTaskStatus_lambda8.doCall(TaskPollingMonitor.groovy:726)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Jan-12 17:24:04.331 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Jan-12 17:24:04.420 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

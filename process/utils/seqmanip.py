@@ -1,5 +1,7 @@
 from pyfaidx import Fasta
 from Bio.Seq import Seq
+import numpy as np
+import ast
 
 def load_reference_genome(fasta_file):
 	"""Loads the reference genome from a FASTA file."""
@@ -21,3 +23,16 @@ def extract_flanking_sequence(row, reference, flank_size):
 		return reference[chrom][start:end].seq
 	except KeyError:
 		return None
+
+def safe_to_array(val):
+	if isinstance(val, str):
+		val = ast.literal_eval(val)
+	return np.atleast_1d(np.array(val, dtype=float))
+
+def vcf2bed(df, VAR_Type):
+	if (VAR_Type =='SNV') | (VAR_Type =='INS'):
+		df['STOP'] = df['POS']
+	else:
+		df['STOP'] = df['POS']+df['REF_len']-1
+	df = df[['CHROM','POS','STOP','REF', 'ALT', 'VAR_Type', 'MutationID', 'Sample Names']]
+	return df

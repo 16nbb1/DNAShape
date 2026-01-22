@@ -1,6 +1,0 @@
-#!/bin/bash -ue
-echo "Type: INDEL"
-java -Xmx8g -jar /home/nboev/projects/def-sushant/nboev/tools/snpEff/snpEff/snpEff.jar -v -motif GRCh38.99 CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.vcf > CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.annotMotif.vcf
-java -Xmx8g -jar /home/nboev/projects/def-sushant/nboev/tools/snpEff/snpEff/SnpSift.jar phastCons /home/nboev/projects/def-sushant/nboev/tools/snpEff/snpEff/db/phastCons CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.annotMotif.vcf > CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.annotMotifPhast.vcf
-rm CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.annotMotif.vcf
-rm -f CPTAC-3.90e5a56c-003c-45b1-9773-e6efc7a51cec.wgs.tumor_normal.gatk4_mutect2.raw_somatic_mutation.INDEL.recode.vcf

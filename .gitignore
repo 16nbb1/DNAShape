@@ -2,3 +2,4 @@
 .nextflow/cache/
 work/
 *.log
+.nextflow*

@@ -8,7 +8,6 @@ from utils import loadsave
 def mergingContext(input_loc):
 	li=[]
 	for i in input_loc:
-		print(i)
 		df = loadsave.load_tsvHeaders(i)
 		li.append(df)
 	big = pd.concat(li)

@@ -42,7 +42,8 @@ process ANNOT_VCF {
 process SIGPROFILER {
 	tag "$sample_id:$subdir"
 	input:
-		tuple val(sample_id), path(annot_dir), val(subdir)
+		tuple val(sample_id),path(vcfs),val(subdir)
+		//tuple val(sample_id), path(annot_dir), val(subdir)
 	output:
 		tuple val(sample_id), path("sigprofiler"), val(subdir), path("input"), emit: sigprofiler_vcfs
 	script:
@@ -50,7 +51,7 @@ process SIGPROFILER {
 		module load StdEnv/2023 python scipy-stack
 		source ~/virtenv/bin/activate
 		mkdir -p sigprofiler input
-		mv ${annot_dir}/*.annotMotifPhast.vcf input
+		cp ${vcfs} input/
 		python ${projectDir}/process/sigprofiler.py input sigprofiler ${params.snpeff_genome} ${subdir}
 		"""
 }
@@ -59,14 +60,14 @@ process SNV_CONTEXT {
 	input:
 		tuple val(sample_id), path(snv_file), path(decomposed_probs_files), val(subdir)
 	output:
-		path "*bpSNVSeqcontext.tsv", emit: snv_context
+		path "*.tsv", emit: snv_context
 		path "*.bed", emit: snv_bed
 	//publishDir { "${params.output_dir}/${sample_id}/${subdir}" }, mode: 'copy'
 	script:
 		"""
 		module load StdEnv/2023 python scipy-stack
 		source ~/ENV/bin/activate
-		python ${projectDir}/process/mutcontextSNV.py ${snv_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bpSNVSeqcontext.tsv ${snv_file}.bed
+		python ${projectDir}/process/mutcontextSNV.py ${snv_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bp_${sample_id}_SNVSeqcontext.tsv ${snv_file}_${sample_id}.bed
 		"""
 }
 
@@ -74,9 +75,8 @@ process INDEL_CONTEXT {
 	input:
 		tuple val(sample_id), path(indel_file), path(decomposed_probs_files), val(subdir)
 	output:
-		//path "*bpINDELSeqContext.tsv", emit: indel_context
-		path "DEL*bpINDELSeqContext.tsv", emit: del_context
-		path "INS*bpINDELSeqContext.tsv", emit: ins_context
+		path "DEL*.tsv", emit: del_context
+		path "INS*.tsv", emit: ins_context
 
 		path "DEL*.bed", emit: del_bed
 		path "INS*.bed", emit: ins_bed
@@ -85,7 +85,7 @@ process INDEL_CONTEXT {
 		"""
 		module load StdEnv/2023 python scipy-stack
 		source ~/ENV/bin/activate
-		python ${projectDir}/process/mutcontextINDEL.py ${indel_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bpINDELSeqContext.tsv ${indel_file}.bed
+		python ${projectDir}/process/mutcontextINDEL.py ${indel_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bp_${sample_id}_INDELSeqContext.tsv ${indel_file}_${sample_id}.bed
 		"""
 }
 
@@ -93,11 +93,11 @@ process MERGE_BED {
 	input:
 		tuple val(category), path(bed_files)
 	output:
-		path "merged_5bp${category}Seqcontext.bed"
+		path "*.bed"
 	publishDir { "${params.output_dir}" }, mode: 'copy'
 	script:
 		"""
-		cat ${bed_files.join(' ')} | sort -k1,1 -k2,2n > merged_${params.flank_size}bp${category}Seqcontext.bed
+		cat ${bed_files.join(' ')} | sort -k1,1 -k2,2n > merged_${params.flank_size}bp${category}.bed
 		"""
 }
 
@@ -111,7 +111,7 @@ process MERGE_CONTEXT {
 		"""
 		module load StdEnv/2023 python scipy-stack
 		source ~/ENV/bin/activate
-		python ${projectDir}/process/mergingContext.py merged_${params.flank_size}bp${category}Seqcontext.tsv ${context_files}
+		python ${projectDir}/process/mergingContext.py MERGED_${params.flank_size}bp${category}Seqcontext.tsv ${context_files}
 		"""
 }
 
@@ -131,7 +131,9 @@ workflow {
 	annotated_indel = annotated.filter { it[2] == 'INDEL' }
 
 	all_annotated = annotated_snv.concat(annotated_indel)
-	sigprofiler_ch = SIGPROFILER(all_annotated.map {sid, vcf, type -> tuple(sid, vcf.getParent(), type) })
+
+	sigprofiler_ch = SIGPROFILER(all_annotated.map { sid, vcf, type ->tuple(sid, vcf, type)})
+
 	snv_sig = sigprofiler_ch.filter { it[2] == 'SNV' }
 	indel_sig = sigprofiler_ch.filter { it[2] == 'INDEL' }
 
@@ -152,11 +154,10 @@ workflow {
 
 	all_contexts_ch = indel_context_result.del_context.map { context -> tuple('DEL', context) }
 		.mix(indel_context_result.ins_context.map { context -> tuple('INS', context) })
-		.mix(snv_context_result.snv_bed.map { context -> tuple('SNV', context) })
+		.mix(snv_context_result.snv_context.map { context -> tuple('SNV', context) })
 		.groupTuple()
 		.map { type, contexts -> tuple(type, contexts) }
-	MERGE_CONTEXT(all_beds_ch)
-
+	MERGE_CONTEXT(all_contexts_ch)
 }
 
 

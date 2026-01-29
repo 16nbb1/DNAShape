@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --mem=2G
-#SBATCH --time=00:30:00
+#SBATCH --time=2-00:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=nb.boev@mail.utoronto.ca
 #SBATCH --job-name=next
@@ -11,19 +11,32 @@
 # trying to run a simple nextflow:
 module load nextflow/25.10.2
 
-# recall, the samplesheet should already be filtered for patients with primaries + the right cancer type (ie. i should split up my luad/lusc) + pick one vcf per patient?? maybe based on sample quality
-# the memory allocation for this job should be super low, but the time needs to span the amount of time we require for all the jobs to finish
+# Note, within the sample sheet, one vcf corresponds to one individual. See the /home/nboev/projects/def-sushant/nboev/data/CPTAC-3/execute_SampleSheet.sh for the selection I did
+mkdir /home/nboev/scratch/nextflow
+mkdir -p /home/nboev/scratch/$1/$2/$3
+mkdir -p /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
 
 nextflow run main.nf \
 -c hg38.config \
---samplesheet CPTAC3_BrainWGS.tsv \
---output_dir /home/nboev/scratch/CPTAC-3/BrainCancer/wgs \
--resume
+-work-dir /home/nboev/scratch/nextflow \
+--samplesheet $4 \
+--output_dir /home/nboev/scratch/$1/$2/$3
 
-# sbatch tryingnext.sh
+# Moving the files I will likely need for long term storage (optional)
+cp /home/nboev/scratch/$1/$2/$3/merged_5bpDEL.bed /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
+cp /home/nboev/scratch/$1/$2/$3/merged_5bpINS.bed /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
+cp /home/nboev/scratch/$1/$2/$3/merged_5bpSNV.bed /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
+
+cp /home/nboev/scratch/$1/$2/$3/MERGED_5bpDELSeqcontext.tsv /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
+cp /home/nboev/scratch/$1/$2/$3/MERGED_5bpINSSeqcontext.tsv /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
+cp /home/nboev/scratch/$1/$2/$3/MERGED_5bpSNVSeqcontext.tsv /home/nboev/projects/def-sushant/nboev/preprocess/$1/$2/$3
 
 
-# NOTE!! Since I changed the kmer strategy--> need to create a sample-level bed --> intersect with gc content beds, then calculate the kmer counts
+# Running, 2026/01/29
+# sbatch tryingnext.sh CPTAC-3 GBM wgs nfSheet_CPTAC3GBM.tsv
+# sbatch tryingnext.sh CPTAC-3 PDA wgs nfSheet_CPTAC3PDA.tsv
+# sbatch tryingnext.sh CPTAC-3 LUSC wgs nfSheet_CPTAC3LUSC.tsv
+
 
 # Note: I need to double check what would happen if the vcfs I pass (like for celegans), doesnt have indels?
 # In the case for the Zou paper, I should pass in the "constructed" vcfs that contain both?

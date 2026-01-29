@@ -30,9 +30,13 @@ def safe_to_array(val):
 	return np.atleast_1d(np.array(val, dtype=float))
 
 def vcf2bed(df, VAR_Type):
-	if (VAR_Type =='SNV') | (VAR_Type =='INS'):
+	if (VAR_Type =='SNV'):
 		df['STOP'] = df['POS']
+		df = df[['CHROM','POS','STOP','REF', 'ALT', 'VAR_Type', 'MutationType', 'MutationID','WT_flankseq',  'Sample Names']]
+	elif  (VAR_Type =='INS'):
+		df['STOP'] = df['POS']
+		df = df[['CHROM','POS','STOP','REF', 'ALT', 'VAR_Type', 'MutationType', 'MutationID', 'Flankseq', 'Sample Names']]
 	else:
 		df['STOP'] = df['POS']+df['REF_len']-1
-	df = df[['CHROM','POS','STOP','REF', 'ALT', 'VAR_Type', 'MutationID', 'Sample Names']]
+		df = df[['CHROM','POS','STOP','REF', 'ALT', 'VAR_Type', 'MutationType', 'MutationID', 'Flankseq', 'Sample Names']]
 	return df

@@ -6,10 +6,10 @@ process FILTER_SNV {
 	module 'vcftools'
 	module 'bcftools'
 	input:
-		path vcf
+		tuple val(sample_id), path(vcf)
 	output:
-		path "SNV/*.recode.vcf", emit: snv_vcf
-		path "INDEL/*.recode.vcf", emit: indel_vcf
+		tuple val(sample_id), path("SNV/*.recode.vcf"), emit: snv_vcf
+		tuple val(sample_id), path("INDEL/*.recode.vcf"), emit: indel_vcf
 	script:
 		"""
 		mkdir -p SNV INDEL
@@ -22,10 +22,10 @@ process ANNOT_VCF {
 	module 'StdEnv/2023'
 	module 'java/21.0.1'
 	input:
-		tuple path(vcf), val(type)
+		tuple val(sample_id), path(vcf), val(type)
 	output:
-		tuple path("${vcf.baseName}.annotMotifPhast.vcf"), val(type)
-	publishDir { "${params.output_dir}/${type}" }, mode: 'copy'
+		tuple val(sample_id),path("${vcf.baseName}.annotMotifPhast.vcf"), val(type)
+	publishDir { "${params.output_dir}/${sample_id}/${type}" }, mode: 'copy'
 
 	script:
 		"""
@@ -40,12 +40,11 @@ process ANNOT_VCF {
 }
 
 process SIGPROFILER {
-	tag "$subdir"
+	tag "$sample_id:$subdir"
 	input:
-		tuple val(annot_dir), val(subdir)
+		tuple val(sample_id), path(annot_dir), val(subdir)
 	output:
-		tuple path("sigprofiler"), val(subdir), path("input"), emit: sigprofiler_vcfs
-
+		tuple val(sample_id), path("sigprofiler"), val(subdir), path("input"), emit: sigprofiler_vcfs
 	script:
 		"""
 		module load StdEnv/2023 python scipy-stack
@@ -58,11 +57,11 @@ process SIGPROFILER {
 
 process SNV_CONTEXT {
 	input:
-		tuple path(snv_file), path(decomposed_probs_files), val(subdir)
+		tuple val(sample_id), path(snv_file), path(decomposed_probs_files), val(subdir)
 	output:
-		path "*.tsv"
-		path "*.bed"
-	publishDir { "${params.output_dir}/${subdir}" }, mode: 'copy'
+		path "*bpSNVSeqcontext.tsv", emit: snv_context
+		path "*.bed", emit: snv_bed
+	//publishDir { "${params.output_dir}/${sample_id}/${subdir}" }, mode: 'copy'
 	script:
 		"""
 		module load StdEnv/2023 python scipy-stack
@@ -73,46 +72,91 @@ process SNV_CONTEXT {
 
 process INDEL_CONTEXT {
 	input:
-		tuple path(indel_file), path(decomposed_probs_files), val(subdir)
+		tuple val(sample_id), path(indel_file), path(decomposed_probs_files), val(subdir)
 	output:
-		path "*.tsv"
-		path "*.bed"
+		//path "*bpINDELSeqContext.tsv", emit: indel_context
+		path "DEL*bpINDELSeqContext.tsv", emit: del_context
+		path "INS*bpINDELSeqContext.tsv", emit: ins_context
 
-	publishDir { "${params.output_dir}/${subdir}" }, mode: 'copy'
+		path "DEL*.bed", emit: del_bed
+		path "INS*.bed", emit: ins_bed
+	//publishDir { "${params.output_dir}/${sample_id}/${subdir}" }, mode: 'copy'
 	script:
 		"""
 		module load StdEnv/2023 python scipy-stack
 		source ~/ENV/bin/activate
-		python ${projectDir}/process/mutcontextINDEL.py ${indel_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bpINDELContext.tsv ${indel_file}.bed
+		python ${projectDir}/process/mutcontextINDEL.py ${indel_file} ${decomposed_probs_files} ${params.kmer_file} ${params.ref_fasta} ${params.flank_size} ${params.chrlist} ${params.flank_size}bpINDELSeqContext.tsv ${indel_file}.bed
 		"""
 }
 
+process MERGE_BED {
+	input:
+		tuple val(category), path(bed_files)
+	output:
+		path "merged_5bp${category}Seqcontext.bed"
+	publishDir { "${params.output_dir}" }, mode: 'copy'
+	script:
+		"""
+		cat ${bed_files.join(' ')} | sort -k1,1 -k2,2n > merged_${params.flank_size}bp${category}Seqcontext.bed
+		"""
+}
+
+process MERGE_CONTEXT {
+	input:
+		tuple val(category), path(context_files)
+	output:
+		path "*.tsv"
+	publishDir { "${params.output_dir}" }, mode: 'copy'
+	script:
+		"""
+		module load StdEnv/2023 python scipy-stack
+		source ~/ENV/bin/activate
+		python ${projectDir}/process/mergingContext.py merged_${params.flank_size}bp${category}Seqcontext.tsv ${context_files}
+		"""
+}
 
 workflow {
-	if (!params.input) {error "Please provide an input file using --input"}
+	if (!params.samplesheet) {error "Please provide a samplesheet using --samplesheet"}
 
-	input_ch = Channel.fromPath(params.input)
-	filtered = FILTER_SNV(input_ch)
+	samples_ch = Channel.fromPath(params.samplesheet).splitCsv(header: true, sep: '\t').map { row ->tuple(row.sample_id,file(row.vcf))}
 
-	snv_vcf = filtered.snv_vcf.map { vcf -> tuple(vcf, 'SNV') }
-	indel_vcf = filtered.indel_vcf.map { vcf -> tuple(vcf, 'INDEL') }
+	filtered = FILTER_SNV(samples_ch)
+
+	snv_vcf = filtered.snv_vcf.map {sid, vcf -> tuple(sid,vcf, 'SNV') }
+	indel_vcf = filtered.indel_vcf.map {sid, vcf -> tuple(sid,vcf, 'INDEL') }
 	combined_vcfs = snv_vcf.concat(indel_vcf)
 
 	annotated = ANNOT_VCF(combined_vcfs)
-	annotated_snv = annotated.filter { it[1] == 'SNV' }
-	annotated_indel = annotated.filter { it[1] == 'INDEL' }
+	annotated_snv = annotated.filter { it[2] == 'SNV' }
+	annotated_indel = annotated.filter { it[2] == 'INDEL' }
 
 	all_annotated = annotated_snv.concat(annotated_indel)
-	sigprofiler_ch = SIGPROFILER(all_annotated.map { vcf, type -> tuple(vcf.getParent(), type) })
-	snv_sig = sigprofiler_ch.filter { it[1] == 'SNV' }
-	indel_sig = sigprofiler_ch.filter { it[1] == 'INDEL' }
+	sigprofiler_ch = SIGPROFILER(all_annotated.map {sid, vcf, type -> tuple(sid, vcf.getParent(), type) })
+	snv_sig = sigprofiler_ch.filter { it[2] == 'SNV' }
+	indel_sig = sigprofiler_ch.filter { it[2] == 'INDEL' }
 
-	snv_pairs =snv_sig.map { sig_dir, subdir, vcf_dir ->
-		tuple(file("${vcf_dir}/*.vcf"),file("${sig_dir}/Assignment_Solution/Activities/Decomposed_Mutation_Probabilities/Decomposed_Mutation_Probabilities_*.txt"), 'SNV')}
-	SNV_CONTEXT(snv_pairs)
+	snv_pairs =snv_sig.map {sid, sig_dir, subdir, vcf_dir ->
+		tuple(sid, file("${vcf_dir}/*.vcf"),file("${sig_dir}/Assignment_Solution/Activities/Decomposed_Mutation_Probabilities/Decomposed_Mutation_Probabilities_*.txt"), 'SNV')}
+	snv_context_result = SNV_CONTEXT(snv_pairs)
 
-	indel_pairs =indel_sig.map { sig_dir, subdir, vcf_dir ->
-		tuple(file("${vcf_dir}/*.vcf"),file("${sig_dir}/Assignment_Solution/Activities/Decomposed_Mutation_Probabilities/Decomposed_Mutation_Probabilities_*.txt"), 'INDEL')}
-	INDEL_CONTEXT(indel_pairs)
+	indel_pairs =indel_sig.map {sid, sig_dir, subdir, vcf_dir ->
+		tuple(sid, file("${vcf_dir}/*.vcf"),file("${sig_dir}/Assignment_Solution/Activities/Decomposed_Mutation_Probabilities/Decomposed_Mutation_Probabilities_*.txt"), 'INDEL')}
+	indel_context_result = INDEL_CONTEXT(indel_pairs)
+
+	all_beds_ch = indel_context_result.del_bed.map { bed -> tuple('DEL', bed) }
+		.mix(indel_context_result.ins_bed.map { bed -> tuple('INS', bed) })
+		.mix(snv_context_result.snv_bed.map { bed -> tuple('SNV', bed) })
+		.groupTuple()
+		.map { type, beds -> tuple(type, beds) }
+	MERGE_BED(all_beds_ch)
+
+	all_contexts_ch = indel_context_result.del_context.map { context -> tuple('DEL', context) }
+		.mix(indel_context_result.ins_context.map { context -> tuple('INS', context) })
+		.mix(snv_context_result.snv_bed.map { context -> tuple('SNV', context) })
+		.groupTuple()
+		.map { type, contexts -> tuple(type, contexts) }
+	MERGE_CONTEXT(all_beds_ch)
+
 }
+
 

@@ -110,8 +110,5 @@ if __name__ == "__main__":
 	merged = processSNV(snv, ref_fasta,  flank_size, sig, kmer, input_snv)
 	bed = seqmanip.vcf2bed(merged, 'SNV')
 
-	counting = merged.groupby(['Sample Names', 'WT_flankseq', 'VAR_Type'], as_index=False).size()
-
 	loadsave.save_tsv(merged, dir_out)
-	loadsave.save_tsv(counting, 'COUNT'+dir_out)
 	loadsave.save_bed(bed, 'SNV'+dir_bed)

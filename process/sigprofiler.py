@@ -13,6 +13,7 @@ output_directory = str(argv[2])
 ref = str(argv[3])
 vartype = str(argv[4])
 
+# update when I run the Zou + Volkova datasets
 if (ref == 'GRCh38.99'):
 	if (vartype=='SNV'):
 		Analyze.cosmic_fit(samples=vcf_directory,output=output_directory,input_type="vcf",context_type="96",genome_build="GRCh38",exome=False,export_probabilities_per_mutation=True,cosmic_version=3.4)

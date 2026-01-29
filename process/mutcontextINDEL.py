@@ -87,10 +87,7 @@ if __name__ == "__main__":
 	bedINS = seqmanip.vcf2bed(mergedINS, 'INS')
 	bedDEL = seqmanip.vcf2bed(mergedDEL, 'DEL')
 
-	merged = pd.concat([mergedINS, mergedDEL], axis=0, ignore_index=True)
-	counting = merged.groupby(['Sample Names', 'Flankseq', 'VAR_Type'], as_index=False).size()
-
-	loadsave.save_tsv(merged, dir_out)
-	loadsave.save_tsv(counting, 'COUNT'+dir_out)
+	loadsave.save_tsv(mergedINS, 'INS'+dir_out)
+	loadsave.save_tsv(mergedDEL, 'DEL'+dir_out)
 	loadsave.save_bed(bedINS, 'INS'+dir_bed)
 	loadsave.save_bed(bedDEL, 'DEL'+dir_bed)

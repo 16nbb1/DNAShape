@@ -60,8 +60,8 @@ process SNV_CONTEXT {
 	input:
 		tuple val(sample_id), path(snv_file), path(decomposed_probs_files), val(subdir)
 	output:
-		path "*.tsv", emit: snv_context
-		path "*.bed", emit: snv_bed
+		path "*.tsv", emit: snv_context, optional: true
+		path "*.bed", emit: snv_bed, optional: true
 	//publishDir { "${params.output_dir}/${sample_id}/${subdir}" }, mode: 'copy'
 	script:
 		"""
@@ -75,11 +75,11 @@ process INDEL_CONTEXT {
 	input:
 		tuple val(sample_id), path(indel_file), path(decomposed_probs_files), val(subdir)
 	output:
-		path "DEL*.tsv", emit: del_context
-		path "INS*.tsv", emit: ins_context
+		path "DEL*.tsv", emit: del_context, optional: true
+		path "INS*.tsv", emit: ins_context, optional: true
 
-		path "DEL*.bed", emit: del_bed
-		path "INS*.bed", emit: ins_bed
+		path "DEL*.bed", emit: del_bed, optional: true
+		path "INS*.bed", emit: ins_bed, optional: true
 	//publishDir { "${params.output_dir}/${sample_id}/${subdir}" }, mode: 'copy'
 	script:
 		"""
@@ -92,6 +92,8 @@ process INDEL_CONTEXT {
 process MERGE_BED {
 	input:
 		tuple val(category), path(bed_files)
+	when:
+		bed_files && bed_files.size() > 0
 	output:
 		path "*.bed"
 	publishDir { "${params.output_dir}" }, mode: 'copy'
@@ -104,6 +106,8 @@ process MERGE_BED {
 process MERGE_CONTEXT {
 	input:
 		tuple val(category), path(context_files)
+	when:
+		context_files && context_files.size() > 0
 	output:
 		path "*.tsv"
 	publishDir { "${params.output_dir}" }, mode: 'copy'
@@ -127,11 +131,25 @@ workflow {
 	combined_vcfs = snv_vcf.concat(indel_vcf)
 
 	annotated = ANNOT_VCF(combined_vcfs)
-	annotated_snv = annotated.filter { it[2] == 'SNV' }
-	annotated_indel = annotated.filter { it[2] == 'INDEL' }
+	annotated_non_empty = annotated.filter { sid, vcf, type ->
+		if ( !vcf.exists() ) { 
+			log.warn "VCF does not exist for ${sid}: ${vcf}"
+			return false }
+		if ( vcf.size() == 0 ) {
+			log.warn "VCF is empty for ${sid}: ${vcf}"
+			return false }
+		true }
+
+	// this might create issues? not 100% sure why the it was removed?
+	//annotated_snv = annotated.filter { it[2] == 'SNV' }
+	//annotated_indel = annotated.filter { it[2] == 'INDEL' }
+	annotated_snv = annotated_non_empty.filter { sid, vcf, type ->type == 'SNV'}
+	annotated_indel = annotated_non_empty.filter { sid, vcf, type ->type == 'INDEL'}
 
 	all_annotated = annotated_snv.concat(annotated_indel)
+	// checking for empty files, from the annot step?
 
+	// check that the vcf is non empty before doing it
 	sigprofiler_ch = SIGPROFILER(all_annotated.map { sid, vcf, type ->tuple(sid, vcf, type)})
 
 	snv_sig = sigprofiler_ch.filter { it[2] == 'SNV' }
@@ -144,6 +162,8 @@ workflow {
 	indel_pairs =indel_sig.map {sid, sig_dir, subdir, vcf_dir ->
 		tuple(sid, file("${vcf_dir}/*.vcf"),file("${sig_dir}/Assignment_Solution/Activities/Decomposed_Mutation_Probabilities/Decomposed_Mutation_Probabilities_*.txt"), 'INDEL')}
 	indel_context_result = INDEL_CONTEXT(indel_pairs)
+
+	// add something where myFile.exists() --> checking before merging
 
 	all_beds_ch = indel_context_result.del_bed.map { bed -> tuple('DEL', bed) }
 		.mix(indel_context_result.ins_bed.map { bed -> tuple('INS', bed) })

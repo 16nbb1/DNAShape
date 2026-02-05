@@ -81,13 +81,13 @@ if __name__ == "__main__":
 	kmer = loadsave.load_tsvHeaders(input_kmerfile)
 
 	chr_list = loadsave.load_txtlist(chr_file)
-	mergedINS = processINDEL(INS, ref_fasta, chr_list,  flank_size, sig,kmer, 'INS', input_indel)
-	mergedDEL = processINDEL(DEL, ref_fasta, chr_list,  flank_size, sig,kmer, 'DEL', input_indel)
-
-	bedINS = seqmanip.vcf2bed(mergedINS, 'INS')
-	bedDEL = seqmanip.vcf2bed(mergedDEL, 'DEL')
-
-	loadsave.save_tsv(mergedINS, 'INS'+dir_out)
-	loadsave.save_tsv(mergedDEL, 'DEL'+dir_out)
-	loadsave.save_bed(bedINS, 'INS'+dir_bed)
-	loadsave.save_bed(bedDEL, 'DEL'+dir_bed)
+	if len(INS)>0:
+		mergedINS = processINDEL(INS, ref_fasta, chr_list,  flank_size, sig,kmer, 'INS', input_indel)
+		bedINS = seqmanip.vcf2bed(mergedINS, 'INS')
+		loadsave.save_tsv(mergedINS, 'INS'+dir_out)
+		loadsave.save_bed(bedINS, 'INS'+dir_bed)
+	if len(DEL)>0:
+		mergedDEL = processINDEL(DEL, ref_fasta, chr_list,  flank_size, sig,kmer, 'DEL', input_indel)
+		bedDEL = seqmanip.vcf2bed(mergedDEL, 'DEL')
+		loadsave.save_tsv(mergedDEL, 'DEL'+dir_out)
+		loadsave.save_bed(bedDEL, 'DEL'+dir_bed)

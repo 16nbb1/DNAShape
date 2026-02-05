@@ -107,8 +107,9 @@ if __name__ == "__main__":
 	sig = sigfileManipSNV(sig)
 
 	kmer = loadsave.load_tsvHeaders(input_kmerfile)
-	merged = processSNV(snv, ref_fasta,  flank_size, sig, kmer, input_snv)
-	bed = seqmanip.vcf2bed(merged, 'SNV')
+	if len(snv)>0:
+		merged = processSNV(snv, ref_fasta,  flank_size, sig, kmer, input_snv)
+		bed = seqmanip.vcf2bed(merged, 'SNV')
 
-	loadsave.save_tsv(merged, dir_out)
-	loadsave.save_bed(bed, 'SNV'+dir_bed)
+		loadsave.save_tsv(merged, dir_out)
+		loadsave.save_bed(bed, 'SNV'+dir_bed)
